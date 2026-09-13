@@ -30,6 +30,9 @@ docker-compose | v2.10.
 Id  | Description                                                          
 ----|----------------------------------------------------------------------
 001 | [HowTo - Create an 'Hello World' App with Django](https://github.com/schneidermatic/Django-HowTos/tree/develop/HowTo%20-%20Create%20an%20'Hello%20World'%20App%20with%20Django)
+002 | [HowTo - Use self-signed SSL Certificates in Django](https://github.com/schneidermatic/Django-HowTos/tree/develop/HowTo%20-%20Use%20self-signed%20SSL%20Certificates%20in%20Django)
+003 | [HowTo - Dockerize a Django Web App and PostgreSQL](https://github.com/schneidermatic/Django-HowTos/tree/develop/HowTo%20-%20Dockerize%20a%20Django%20Web%20App%20and%20PostgreSQL)
+004 | [HowTo - Use Tailwind CSS and Flowbite static Files with Django](https://github.com/schneidermatic/Django-HowTos/tree/develop/HowTo%20-%20Use%20Tailwind%20CSS%20and%20Flowbite%20static%20Files%20with%20Django)
 
 
 ## SETUP
