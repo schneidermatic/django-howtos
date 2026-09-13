@@ -4,20 +4,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this repo is
 
-A collection of independent Django learning/demo projects ("HowTos"). There is no shared package, build system, linter/formatter config, or CI. Each `HowTo - <Topic>/` directory is a self-contained Django project with its own unpinned `requirements.txt` and its own `venv/` — a change in one HowTo does not apply to the others.
+A collection of independent Django learning/demo projects ("HowTos"). There is no shared package, build system, linter/formatter config, or CI. Each `HowTo - <Topic>/` directory is a self-contained Django project with its own `requirements.txt` and its own `venv/` — a change in one HowTo does not apply to the others. Requirements are unpinned, except in HowTo 005.
 
 Common layout of a HowTo:
 
 ```
 HowTo - <Topic>/
   .apprc             # exports CWD=$(pwd), then sources ../.apprc (root helpers)
-  requirements.txt   # Docker HowTo: lives in app/ instead
+  README.md          # step-by-step instructions (see Conventions)
+  requirements.txt   # Docker HowTos (003, 005): lives in app/ instead
   app/               # Django project root — manage.py lives here
     app/             # project package (settings.py, urls.py, ...)
-    core/            # Django app (Tailwind + Docker HowTos only)
+    core/            # Django app (HowTos 003, 004, 005 only)
 ```
 
-The project package is always named `app` and the Django app `core`. Django versions differ (Hello World/SSL were generated with 5.1, Tailwind/Docker with 4.2).
+The project package is always named `app` and the Django app `core`. Django versions differ: Hello World/SSL were generated with 5.1, Tailwind/Docker with 4.2, and Deploy (005) with 5.2 LTS.
 
 ## Shell workflow (`.apprc` helpers)
 
@@ -47,7 +48,7 @@ python3 -m venv venv && . venv/bin/activate && pip install -r requirements.txt
 cd app
 python manage.py migrate
 python manage.py runserver
-python manage.py test                                   # all tests (tests.py files are empty stubs)
+python manage.py test                                   # all tests (only HowTo 005 has real tests)
 python manage.py test core.tests.<TestCase>.<method>    # single test
 ```
 
@@ -60,8 +61,19 @@ python manage.py test core.tests.<TestCase>.<method>    # single test
   - `DATABASES` reads `POSTGRES_NAME/USER/PASSWORD` from the environment and hardcodes the host `postgres` (the compose service name). DB-touching `manage.py` commands therefore only work inside compose.
   - Compose mounts `.:/code` but the image's `WORKDIR` is `/app`, so code changes need a rebuild.
   - The README targets Docker Desktop with WSL 2 integration.
+- **Deploy with Gunicorn, Nginx and SSL (005)**: a production-like stack. Unlike 003, `docker-compose.yml` sits at the HowTo root and `app/` is only the build context. A plain `docker compose up` must work on a fresh clone, with no setup steps. The stack is `nginx` → `web`:
+  - `nginx` is its own image built from `nginx/`, with the config baked in. It handles TLS termination and the HTTP→HTTPS redirect, and serves `/static/` from the shared volume `static_data`.
+  - `web` runs Gunicorn, configured in `app/gunicorn.conf.py`.
+  - The database is SQLite at `app/data/db.sqlite3`, which is the volume `sqlite_data` in the container. `app/data/.gitignore` keeps the directory in git but ignores the DB files. It uses WAL mode and `transaction_mode: IMMEDIATE`, because several Gunicorn workers write concurrently.
+  - `.env` is optional: `env_file` uses `required: false`, which needs Compose ≥ 2.24, and `settings.py` has defaults for everything.
+  - The secret key comes from `DJANGO_SECRET_KEY`, or else from `data/secret_key`, which `app/entrypoint.sh` generates on the first start. Local `manage.py` runs outside Docker need `DJANGO_SECRET_KEY` set, e.g. `DJANGO_SECRET_KEY=x python manage.py test`.
+  - `nginx/40-create-self-signed-cert.sh` runs from `/docker-entrypoint.d/` and creates `cert.pem`/`key.pem` in the volume `nginx_ssl` if they are missing.
+  - Changes to `app/` or `nginx/` need `docker compose up --build`.
+  - `app/entrypoint.sh` runs `migrate` + `collectstatic` on every container start. `/healthz/` is exempt from `SECURE_SSL_REDIRECT` for the container health check, which needs `localhost` in `DJANGO_ALLOWED_HOSTS`.
+  - HSTS is deliberately off (self-signed cert). `check --deploy` reports only `security.W004`.
 
 ## Conventions
 
 - Commit messages follow `* Added - ...`, `* Updated - ...`, `* Fixed - ...`, `* Deleted - ...`.
-- The root `README.md` "CONTENT" table indexes the HowTos (numbered in the order they were added). Add a row there when adding a new HowTo.
+- The root `README.md` "CONTENT" table indexes the HowTos (numbered in the order they were added). Add a row there when adding a new HowTo, and an entry in `CHANGELOG.md` (Keep a Changelog format, tags like `0.2.0`).
+- Each HowTo has an English `README.md` modeled on `assets/templates/app/README.md`. It has these sections: References, Prerequisites, Project Structure, Step by step, and Run the finished example.

@@ -1,0 +1,30 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Django + Gunicorn + Nginx</title>
+    <link rel="stylesheet" href="{% static 'core/style.css' %}">
+</head>
+
+<body>
+    <main>
+        <h1>Hello from Django behind Nginx and Gunicorn!</h1>
+        <table>
+            <tr><th>HTTPS (request.is_secure)</th><td>{{ is_secure }}</td></tr>
+            <tr><th>Host</th><td>{{ host }}</td></tr>
+            <tr><th>Application server</th><td>{{ server }}</td></tr>
+            <tr><th>Client IP (X-Real-IP)</th><td>{{ client_ip }}</td></tr>
+            <tr><th>X-Forwarded-For</th><td>{{ forwarded_for }}</td></tr>
+        </table>
+        <p>
+            This page's stylesheet is served by Nginx from <code>/static/</code>.
+            The <a href="{% url 'admin:index' %}">admin site</a> uses static files, too.
+        </p>
+    </main>
+</body>
+
+</html>

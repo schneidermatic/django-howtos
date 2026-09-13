@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-09-13
+
+### Added
+- HowTo 005 - Deploy Django with Gunicorn, Nginx and SSL in Docker (production-like Docker Compose stack: Nginx with TLS termination and static files, Gunicorn, SQLite in a Docker volume). It starts with a plain `docker compose up`: the secret key and the self-signed certificate are created automatically on the first start.
+
+### Changed
+- `README.md`:
+  - The RUN section now has a quick start for every HowTo type (Python venv, HowTo 002, Docker).
+  - The steps for the `.apprc` helpers are corrected: `app_mkvenv` has to run before `app_run`.
+  - The content table has a new "Runs with" column and a link to the CHANGELOG.
+- `CLAUDE.md`: added notes for HowTo 005.
+
 ## [0.2.0] - 2026-09-13
 
 ### Added

@@ -1,0 +1,37 @@
+# Browser --HTTPS--> nginx (TLS, static files) --HTTP--> web (Gunicorn + Django + SQLite)
+# Start everything with:  docker compose up
+services:
+  web:
+    build: ./app
+    restart: unless-stopped
+    # Optional settings - the app also starts without this file (see .env.example)
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      - sqlite_data:/app/data
+      - static_data:/app/staticfiles
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/healthz/', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  nginx:
+    build: ./nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - nginx_ssl:/etc/nginx/ssl
+      - static_data:/app/staticfiles:ro
+    depends_on:
+      web:
+        condition: service_healthy
+
+volumes:
+  sqlite_data:
+  static_data:
+  nginx_ssl:

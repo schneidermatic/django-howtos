@@ -1,0 +1,9 @@
+#==============================================================================
+# FILE:          .apprc
+# AUTOHR:        Markus Schneider
+# DATE:          2026-09-13
+# PURPOSE:       App specific run command file.
+#==============================================================================
+export CWD=$(pwd)
+
+source "$CWD"/../.apprc
